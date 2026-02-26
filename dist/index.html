@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle Warriors Battle</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+    #game-container {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    #canvas-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+    #canvas-wrapper canvas {
+      display: block;
+    }
+    #ui-panel {
+      width: 220px;
+      background: #12121a;
+      border: 1px solid #2a2a3e;
+      border-radius: 8px;
+      padding: 12px;
+      color: #e0e0f0;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+    }
+    #ui-panel h2 {
+      color: #f0d060;
+      font-size: 15px;
+      text-align: center;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .section-label {
+      color: #8888aa;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .btn {
+      background: #1e1e2e;
+      border: 1px solid #3a3a5e;
+      color: #b0b0d0;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #2a2a4e; border-color: #5a5a8e; }
+    .btn.selected {
+      background: #2d2d5e;
+      border-color: #7070c0;
+      color: #ffffff;
+    }
+    .btn.red.selected    { background: #5e1e1e; border-color: #c04040; color: #ffaaaa; }
+    .btn.blue.selected   { background: #1e2e5e; border-color: #4060c0; color: #aaccff; }
+    .btn.green.selected  { background: #1e4e2e; border-color: #409060; color: #aaffcc; }
+    .btn.yellow.selected { background: #4e4e1e; border-color: #c0b040; color: #ffffaa; }
+    .btn.danger          { border-color: #883333; color: #ff8888; }
+    .btn.primary {
+      background: #2a4a2a;
+      border-color: #50a050;
+      color: #88ff88;
+      font-weight: bold;
+      width: 100%;
+      padding: 8px;
+      font-size: 13px;
+    }
+    .btn.primary:hover { background: #3a6a3a; }
+    .btn.primary:disabled { background: #1a2a1a; color: #446644; cursor: not-allowed; border-color: #334433; }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 0;
+      border-bottom: 1px solid #1e1e2e;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { color: #8888aa; }
+    .stat-value { color: #e0e0f0; font-weight: bold; }
+    .stat-value.positive { color: #88ff88; }
+    .stat-value.negative { color: #ff6666; }
+    .stat-value.win { color: #f0d060; font-size: 14px; }
+    .stat-value.lose { color: #ff4444; font-size: 14px; }
+    #status-badge {
+      text-align: center;
+      padding: 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 14px;
+      background: #1e1e2e;
+      color: #8888aa;
+      letter-spacing: 1px;
+    }
+    #status-badge.running { background: #1a3a1a; color: #66ff66; }
+    #status-badge.win     { background: #2a2a1a; color: #f0d060; }
+    #status-badge.lose    { background: #2a1a1a; color: #ff5555; }
+    .divider {
+      height: 1px;
+      background: #2a2a3e;
+    }
+    .hint {
+      color: #555577;
+      font-size: 11px;
+      text-align: center;
+    }
+    #seed-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    #seed-input {
+      flex: 1;
+      background: #1e1e2e;
+      border: 1px solid #3a3a5e;
+      color: #b0b0d0;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      width: 0;
+    }
+    select {
+      background: #1e1e2e;
+      border: 1px solid #3a3a5e;
+      color: #b0b0d0;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      width: 100%;
+      cursor: pointer;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/index-Bek8nYXq.js"></script>
+</head>
+<body>
+  <div id="game-container">
+    <div id="canvas-wrapper"></div>
+    <div id="ui-panel">
+      <h2>⚔ Circle Warriors</h2>
+
+      <div>
+        <div class="section-label">Warrior</div>
+        <div class="btn-group" id="warrior-btns">
+          <button class="btn red"    data-warrior="0">🔴 Sword</button>
+          <button class="btn blue"   data-warrior="1">🔵 Axe</button>
+          <button class="btn green"  data-warrior="2">🟢 Knuckles</button>
+          <button class="btn yellow" data-warrior="3">🟡 Nunchucks</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Mode</div>
+        <div class="btn-group" id="mode-btns">
+          <button class="btn" data-mode="2">1vs1</button>
+          <button class="btn" data-mode="3">1vs1vs1</button>
+          <button class="btn" data-mode="4">1vs1vs1vs1</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Booster (+1 FUN)</div>
+        <div class="btn-group" id="booster-btns">
+          <button class="btn"        data-booster="none">None</button>
+          <button class="btn danger" data-booster="burger">🍔 Burger</button>
+          <button class="btn danger" data-booster="glove">🥊 Glove</button>
+          <button class="btn danger" data-booster="shield">🛡 Shield</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <div class="section-label">Win Probability</div>
+        <select id="win-prob-select">
+          <option value="0.10">10%</option>
+          <option value="0.30">30%</option>
+          <option value="0.50" selected>50%</option>
+          <option value="0.70">70%</option>
+          <option value="0.90">90%</option>
+        </select>
+      </div>
+
+      <div>
+        <div class="section-label">RNG Seed</div>
+        <div id="seed-row">
+          <input id="seed-input" type="text" placeholder="auto" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="stats-block">
+        <div class="stat-row">
+          <span class="stat-label">Balance</span>
+          <span class="stat-value" id="stat-balance">1000 FUN</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Bet</span>
+          <span class="stat-value">10 FUN</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Live Profit</span>
+          <span class="stat-value" id="stat-profit">0.00 FUN</span>
+        </div>
+        <div class="stat-row" id="final-profit-row" style="display:none">
+          <span class="stat-label">Final Profit</span>
+          <span class="stat-value" id="stat-final-profit">0.00 FUN</span>
+        </div>
+      </div>
+
+      <div id="status-badge">READY</div>
+
+      <button class="btn primary" id="start-btn">▶ START ROUND (10 FUN)</button>
+
+      <div class="hint">Space = Start / Restart</div>
+    </div>
+  </div>
+</body>
+</html>
